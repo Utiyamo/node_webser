@@ -18,18 +18,32 @@ var UserRouter = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     UserRouter.prototype.applyRoutes = function (application) {
-        application.get('/admin/users', function (req, res, next) {
+        application.get('/users', function (req, res, next) {
             users_model_1.User.find().then(function (user) {
                 res.json(user);
                 return next();
             });
         });
-        application.post('/admin/users/addUser', function (req, res, next) {
+        application.post('/users/addUser', function (req, res, next) {
             var user = new users_model_1.User();
             user.name = req.body.name;
             user.email = req.body.email;
             user.password = req.body.password;
             user.save().then(function (user) {
+                res.json(user);
+                return next();
+            });
+        });
+        application.put('/users/:id', function (req, res, next) {
+            var options = { overwrite: true };
+            users_model_1.User.update({ _id: req.params.id }, req.body, options).exec().then(function (result) {
+                if (result.n) {
+                    return users_model_1.User.findById(req.params.id);
+                }
+                else {
+                    res.send(404);
+                }
+            }).then(function (user) {
                 res.json(user);
                 return next();
             });
